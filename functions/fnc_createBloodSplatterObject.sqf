@@ -6,16 +6,10 @@ params [["_splatter", "BloodSplatter_Plane", ["BloodSplatter_Plane"]],
         ["_useFineSplatterPool", true, [true]],
         ["_dir", random 360, [random 360]]];
 
-if (_useFineSplatterPool call FUNC(isMaxBloodSplattersReached)) then
-{
-    [_useFineSplatterPool] spawn FUNC(removeOldestBloodSplatterObject);
-};
+// Use a function to get or create a splatter object from a pool instead of always creating a new one
+_splatterObj = [_splatter, _pos, _tex, _dir, _useFineSplatterPool] call FUNC(getOrCreateSplatterFromPool);
 
-_splatterObj = _splatter createVehicleLocal (getPos objNull);
-_splatterObj setPosASL _pos;
-_splatterObj setDir _dir;
-_splatterObj setObjectTexture [0, _tex];
-
+// Add the splatter object to the appropriate array
 if (_useFineSplatterPool) then
 {
     Barotrauma_BleedSplatters pushBack _splatterObj;
