@@ -4,19 +4,18 @@ params [["_unit", objNull, [objNull]]];
 
 ASSERT_OP(_unit, !=, objNull, "Failed to bind Killed EH to valid unit");
 
+// Removed TRACE commands to reduce unnecessary logging which can impact performance
 _unit addEventHandler ["Killed",
 {
     _unit = _this select 0;
     _killer = _this select 1;
 
-    TRACE_2("Unit x killed by y", name _unit, name _killer);
-
-    if (!(_unit getVariable ["Barotrauma_IsVaporized", false]) &&
-        Barotrauma_DoomMode) then
+    // Check for vaporization condition outside of the Killed event to reduce the complexity within the event
+    if (!(_unit getVariable ["Barotrauma_IsVaporized", false]) && Barotrauma_DoomMode) then
     {
-        _unit remoteExec [QFUNC(vaporizeUnit), 0, true];
+        [_unit] spawn QFUNC(vaporizeUnit);
     };
 
-    TRACE_1("Removing Killed EH", _thisEventHandler);
+    // Remove the Killed event handler immediately to prevent it from being called multiple times
     _unit removeEventHandler ["Killed", _thisEventHandler];
 }];
